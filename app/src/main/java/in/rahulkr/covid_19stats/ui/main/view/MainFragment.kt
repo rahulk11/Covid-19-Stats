@@ -27,7 +27,7 @@ class MainFragment : Fragment() {
             MainFragment()
     }
 
-    private val countries = ArrayList<CountryModel>()
+    private lateinit var dataModel: CovidDataModel
     private lateinit var viewModel: MainViewModel
 
     override fun onCreateView(
@@ -39,20 +39,13 @@ class MainFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        val adapter = CountryAdapter(countries, layoutInflater, object : CountrySelectListener {
-            override fun onCountrySelected(country: CountryModel) {
-                parentFragmentManager.beginTransaction()
-                    .replace(R.id.container, CountryFragment(country))
-                    .addToBackStack(null)
-                    .commit()
-            }
-        })
-        auto_complete_countries.setAdapter(adapter)
         viewModel = ViewModelProviders.of(
             this,
             MainViewModelFactory(ApiHelper(ApiBuilder.apiService))
         ).get(MainViewModel::class.java)
-        setObservers()
+        if (this::dataModel.isInitialized)
+            populateData(dataModel)
+        else setObservers()
     }
 
     private fun setObservers() {
@@ -62,7 +55,8 @@ class MainFragment : Fragment() {
                     Status.SUCCESS -> {
                         progress_circular.visibility = View.GONE
                         resource.data?.let { covidDataModel ->
-                            populateData(covidDataModel)
+                            dataModel = covidDataModel
+                            populateData(dataModel)
                         }
                     }
                     Status.ERROR -> {
@@ -78,7 +72,16 @@ class MainFragment : Fragment() {
     }
 
     private fun populateData(covidData: CovidDataModel) {
-        countries.addAll(covidData.Countries)
         view_global_data.bindData(covidData.Global)
+        val adapter =
+            CountryAdapter(covidData.Countries, layoutInflater, object : CountrySelectListener {
+                override fun onCountrySelected(country: CountryModel) {
+                    parentFragmentManager.beginTransaction()
+                        .replace(R.id.container, CountryFragment(country))
+                        .addToBackStack(null)
+                        .commit()
+                }
+            })
+        auto_complete_countries.setAdapter(adapter)
     }
 }

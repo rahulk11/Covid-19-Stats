@@ -16,12 +16,12 @@ interface CountrySelectListener {
 }
 
 class CountryAdapter(
-    private var countries: ArrayList<CountryModel>,
+    private var countries: List<CountryModel>,
     private var inflater: LayoutInflater,
     private var clickListener: CountrySelectListener
 ) : BaseAdapter(),
     Filterable {
-    private var filteredData = countries
+    private var filteredData = ArrayList<CountryModel>()
     private lateinit var binding: CountryAdapterBinding
     override fun getView(p0: Int, p1: View?, p2: ViewGroup?): View {
         binding = CountryAdapterBinding.inflate(inflater, p2, false)
@@ -49,10 +49,10 @@ class CountryAdapter(
     override fun getFilter(): Filter {
         return object : Filter() {
             override fun performFiltering(p0: CharSequence?): FilterResults {
+                filteredData.clear()
                 if (p0.toString().isEmpty())
-                    filteredData = countries;
+                    filteredData.addAll(countries);
                 else {
-                    filteredData = ArrayList<CountryModel>()
                     for (country in countries) {
                         if (country.Country.contains(p0.toString(), true)) {
                             filteredData.add(country)
