@@ -1,8 +1,8 @@
 package `in`.rahulkr.covid_19stats
 
-import androidx.appcompat.app.AppCompatActivity
+import `in`.rahulkr.covid_19stats.ui.main.view.MainFragment
 import android.os.Bundle
-import `in`.rahulkr.covid_19stats.ui.main.MainFragment
+import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
 
@@ -11,8 +11,16 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.main_activity)
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
-                    .replace(R.id.container, MainFragment.newInstance())
-                    .commitNow()
+                .replace(R.id.container, MainFragment.newInstance())
+                .commitNow()
+        }
+    }
+
+    override fun onBackPressed() {
+        if (supportFragmentManager.backStackEntryCount > 1) {
+            supportFragmentManager.popBackStack()
+        } else {
+            super.onBackPressed()
         }
     }
 }
